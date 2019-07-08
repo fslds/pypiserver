@@ -12,6 +12,7 @@ import re
 import sys
 import pip
 import xmlrpc
+import urllib
 
 try:  # PY3
     from urllib.parse import quote
@@ -319,9 +320,12 @@ def _digest_file(fpath, hash_algo):
     return digester.hexdigest()[:32]
 
 
-def find_packages_fallback(searchstring, index):
-    # TODO smarter dynamic pypi rpc
+def find_packages_fallback(searchstring, fallback_index=None, fallback_search=None):
     index = 'https://pypi.org/RPC2'
+    if fallback_search is not None:
+        index = fallback_search
+    elif fallback_index:
+        index = fallback_index.replace('/simple', '/RPC2')
     pypi = xmlrpc.client.ServerProxy(index)
     hits = pypi.search({'name': searchstring, 'summary': searchstring}, 'or')
     packages = []
