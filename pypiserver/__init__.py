@@ -2,9 +2,9 @@ import os
 import re as _re
 import sys
 
-version = __version__ = "1.3.0"
+version = __version__ = "1.4.0"
 __version_info__ = tuple(_re.split('[.-]', __version__))
-__updated__ = "2019-05-05 15:49:11"
+__updated__ = "2019-07-08 15:49:11"
 
 __title__ = "pypiserver"
 __summary__ = "A minimal PyPI server for use with pip/easy_install."
@@ -40,7 +40,7 @@ def default_config(
         port=8080,
         server=DEFAULT_SERVER,
         redirect_to_fallback=True,
-        index_merge=False,
+        search_index_merge=False,
         fallback_url=None,
         authenticated=['update'],
         password_file=None,
@@ -76,8 +76,8 @@ def default_config(
     :param root:
             A list of paths, derived from the packages specified on cmd-line.
             If `None`, defaults to '~/packages'.
-    :param index:
-            see :option:`--enable-merged-index`
+    :param search_index_merge:
+            see :option:`--search_index_merge`
     :param redirect_to_fallback:
             see :option:`--disable-fallback`
     :param authenticated:
@@ -181,6 +181,7 @@ def paste_app_factory(global_config, **local_conf):
 
     upd_conf_with_bool_item(c, 'overwrite', local_conf)
     upd_conf_with_bool_item(c, 'redirect_to_fallback', local_conf)
+    upd_conf_with_bool_item(c, 'search_index_merge', local_conf)
     upd_conf_with_list_item(c, 'authenticated', local_conf, sep=' ')
     upd_conf_with_list_item(c, 'root', local_conf, sep='\n', parse=_make_root)
     upd_conf_with_int_item(c, 'verbosity', local_conf)
