@@ -68,7 +68,7 @@ def usage():
       disable redirect to real PyPI index for packages not found in the
       local index
     
-    --enable-search-fallback
+    --enable-search-merge
       merge search index of the fallback url if availble with the package index,
       allowing you to use only one search simple search for two indexes.
 
@@ -175,7 +175,7 @@ def main(argv=None):
             "server=",
             "fallback-url=",
             "disable-fallback",
-            "enable-merged-index"
+            "search-index-merge",
             "overwrite",
             "hash-algo=",
             "log-file=",
@@ -217,8 +217,8 @@ def main(argv=None):
             roots.append(v)
         elif k == "--disable-fallback":
             c.redirect_to_fallback = False
-        elif k == "--enable-merged-index":
-            c.index_merge = True
+        elif k == "--search-index-merge":
+            c.search_index_merge = True
         elif k == "--fallback-url":
             c.fallback_url = v
         elif k == "--server":

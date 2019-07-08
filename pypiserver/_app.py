@@ -216,18 +216,40 @@ def handle_rpc():
         "methodName")[0].childNodes[0].wholeText.strip()
     log.info("Processing RPC2 request for '%s'", methodname)
     if methodname == 'search':
+        # TODO better ordering
         value = parser.getElementsByTagName(
             "string")[0].childNodes[0].wholeText.strip()
         response = []
         ordering = 0
+        namelist = []
         for p in packages():
             if p.pkgname.count(value) > 0:
                 # We do not presently have any description/summary, returning
                 # version instead
                 d = {'_pypi_ordering': ordering, 'version': p.version,
-                     'name': p.pkgname, 'summary': p.version}
+                     'name': p.pkgname, 'summary': p.summary}
+                namelist.append(p.pkgname)
                 response.append(d)
             ordering += 1
+        #if config.search_index_merge and config.redirect_to_fallback:
+        print('Eh')
+        print(config)
+        if config.search_index_merge and config.redirect_to_fallback:
+            print(True)
+            fallback_packages = core.find_packages_fallback(
+                value, 
+                config.fallback_url
+            )
+            for package in fallback_packages:
+                if package.pkgname not in namelist:
+                    d = {'_pypi_ordering': ordering, 
+                        'version': package.version, 
+                        'name' : package.pkgname, 
+                        'summary' : package.summary}
+                    response.append(d)
+                    ordering += 1
+                    
+            
         call_string = xmlrpclib.dumps((response,), 'search',
                                       methodresponse=True)
         return call_string

@@ -10,6 +10,8 @@ import mimetypes
 import os
 import re
 import sys
+import pip
+import xmlrpc
 
 try:  # PY3
     from urllib.parse import quote
@@ -206,9 +208,10 @@ class PkgFile(object):
                  'pkgname',
                  'version',
                  'parsed_version',
-                 'replaces']
+                 'replaces',
+                 'summary']
 
-    def __init__(self, pkgname, version, fn=None, root=None, relfn=None, replaces=None):
+    def __init__(self, pkgname, version, fn=None, root=None, relfn=None, replaces=None, summary=None):
         self.pkgname = pkgname
         self.pkgname_norm = normalize_pkgname(pkgname)
         self.version = version
@@ -218,6 +221,10 @@ class PkgFile(object):
         self.relfn = relfn
         self.relfn_unix = None if relfn is None else relfn.replace("\\", "/")
         self.replaces = replaces
+        self.summary = summary
+        if self.summary is None:
+            if self.version is not None:
+                self.summary = self.version
 
     def __repr__(self):
         return "%s(%s)" % (
@@ -257,6 +264,7 @@ def _listdir(root):
 
 def find_packages(pkgs, prefix=""):
     prefix = normalize_pkgname(prefix)
+    
     for x in pkgs:
         if prefix and x.pkgname_norm != prefix:
             continue
@@ -310,6 +318,20 @@ def _digest_file(fpath, hash_algo):
             digester.update(block)
     return digester.hexdigest()[:32]
 
+
+def find_packages_fallback(searchstring, index):
+    # TODO smarter dynamic pypi rpc
+    index = 'https://pypi.org/RPC2'
+    pypi = xmlrpc.client.ServerProxy(index)
+    hits = pypi.search({'name': searchstring, 'summary': searchstring}, 'or')
+    packages = []
+    for package_result in hits:
+        pkg_dict = {}
+        pkg_dict['pkgname'] = package_result.get('name')
+        pkg_dict['version'] = package_result.get('version')
+        pkg_dict['summary'] = package_result.get('summary')
+        packages.append(PkgFile(**pkg_dict))
+    return packages
 
 try:
     from .cache import cache_manager
