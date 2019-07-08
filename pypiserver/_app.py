@@ -232,13 +232,10 @@ def handle_rpc():
                 response.append(d)
             ordering += 1
         #if config.search_index_merge and config.redirect_to_fallback:
-        print('Eh')
-        print(config)
         if config.search_index_merge and config.redirect_to_fallback:
-            print(True)
             fallback_packages = core.find_packages_fallback(
                 value, 
-                config.fallback_url
+                fallback_index=config.fallback_url
             )
             for package in fallback_packages:
                 if package.pkgname not in namelist:
