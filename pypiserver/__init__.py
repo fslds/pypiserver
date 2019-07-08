@@ -40,6 +40,7 @@ def default_config(
         port=8080,
         server=DEFAULT_SERVER,
         redirect_to_fallback=True,
+        index_merge=False,
         fallback_url=None,
         authenticated=['update'],
         password_file=None,
@@ -75,6 +76,8 @@ def default_config(
     :param root:
             A list of paths, derived from the packages specified on cmd-line.
             If `None`, defaults to '~/packages'.
+    :param index:
+            see :option:`--enable-merged-index`
     :param redirect_to_fallback:
             see :option:`--disable-fallback`
     :param authenticated:
