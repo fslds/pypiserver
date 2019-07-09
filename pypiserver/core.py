@@ -350,6 +350,8 @@ def find_packages_fallback(searchstring, fallback_index=None, fallback_search=No
     hits = pypi.search({'name': searchstring, 'summary': searchstring}, 'or')
     packages = {}
     source = index.replace('/RPC2', '')
+    source = source.replace('http://','')
+    source = source.replace('https://', '')
     for package_result in hits:
         pkg_dict = {}
         name = package_result.get('name')
