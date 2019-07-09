@@ -11,7 +11,6 @@ import os
 import re
 import sys
 import pip
-import xmlrpc
 import urllib
 
 try:  # PY3
