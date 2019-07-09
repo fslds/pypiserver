@@ -229,7 +229,11 @@ def handle_rpc():
         for p in packages():
             if p.pkgname.count(query) > 0:
                 # Adding local packages
-                found_packages[p.pkgname] = p
+                if p.pkgname not in found_packages.keys():
+                    found_packages[p.pkgname] = p
+                elif found_packeges[p.pkgname].version < p.version:
+                    found_packages[p.pkgname] = p
+
         for package_name in sorted(found_packages.keys()):
             package = found_packages[package_name]
             d = {
