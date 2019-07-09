@@ -217,36 +217,29 @@ def handle_rpc():
     log.info("Processing RPC2 request for '%s'", methodname)
     if methodname == 'search':
         # TODO better ordering
-        value = parser.getElementsByTagName(
+        query = parser.getElementsByTagName(
             "string")[0].childNodes[0].wholeText.strip()
+        found_packages = {}
         response = []
-        ordering = 0
-        namelist = []
-        for p in packages():
-            if p.pkgname.count(value) > 0:
-                # We do not presently have any description/summary, returning
-                # version instead
-                d = {'_pypi_ordering': ordering, 'version': p.version,
-                     'name': p.pkgname, 'summary': '[local]: ' + p.summary}
-                namelist.append(p.pkgname)
-                response.append(d)
-            ordering += 1
-        #if config.search_index_merge and config.redirect_to_fallback:
         if config.search_index_merge and config.redirect_to_fallback:
-            fallback_packages = core.find_packages_fallback(
-                value, 
+            found_packages = core.find_packages_fallback(
+                query,
                 fallback_index=config.fallback_url
             )
-            for package in fallback_packages:
+        for p in packages():
+            if p.pkgname.count(query) > 0:
+                # Adding local packages
+                found_packages[p.pkgname] = p
+        for package in sorted(found_packages.keys()):
                 if package.pkgname not in namelist:
-                    d = {'_pypi_ordering': ordering, 
+                    d = {
+                        #'_pypi_ordering': ordering, 
+                        # internal pypi value that shouldn't be there. List order suffices.
                         'version': package.version, 
                         'name' : package.pkgname, 
                         'summary' : package.summary}
                     response.append(d)
-                    ordering += 1
-                    
-            
+
         call_string = xmlrpclib.dumps((response,), 'search',
                                       methodresponse=True)
         return call_string

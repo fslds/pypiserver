@@ -18,10 +18,11 @@ try:  # PY3
 except ImportError:  # PY2
     from urllib import quote
 
-try: # PY3
-    from xmlrpc.client import ServerProxy as xmlrpc_ServerProxy
-except ImportError: # PY2
-    from xmlrpclib import ServerProxy as xmlrpc_ServerProxy
+try:
+    import xmlrpc.client as xmlrpclib  # py3
+except ImportError:
+    import xmlrpclib  # py2
+
 import pkg_resources
 
 from . import Configuration
@@ -215,7 +216,18 @@ class PkgFile(object):
                  'replaces',
                  'summary']
 
-    def __init__(self, pkgname, version, fn=None, root=None, relfn=None, replaces=None, summary=None):
+    def __init__(
+            self,
+            pkgname,
+            version,
+            fn=None,
+            root=None,
+            relfn=None,
+            replaces=None,
+            summary=None,
+            source='local',
+            set_prefix=True ):
+
         self.pkgname = pkgname
         self.pkgname_norm = normalize_pkgname(pkgname)
         self.version = version
@@ -225,11 +237,16 @@ class PkgFile(object):
         self.relfn = relfn
         self.relfn_unix = None if relfn is None else relfn.replace("\\", "/")
         self.replaces = replaces
-        self.summary = summary
-        if self.summary is None:
-            if self.version is not None:
-                self.summary = self.version
-
+        source_prefix_fmt = ''
+        if set_prefix:
+            source_prefix_fmt = "[{source}]: ".format(source=source)
+        # Replicating old behavior in case of no description/summary, returning version.
+        if summary is None:
+            if version is not None:
+                summary = version
+                
+        self.summary = source_prefix_fmt + summary
+        
     def __repr__(self):
         return "%s(%s)" % (
             self.__class__.__name__,
@@ -323,26 +340,24 @@ def _digest_file(fpath, hash_algo):
     return digester.hexdigest()[:32]
 
 
-def find_packages_fallback(searchstring, fallback_index=None, fallback_search=None, show_source=True):
+def find_packages_fallback(searchstring, fallback_index=None, fallback_search=None):
     index = 'https://pypi.org/RPC2'
     if fallback_search is not None:
         index = fallback_search
     elif fallback_index:
         index = fallback_index.replace('/simple', '/RPC2')
-    pypi = xmlrpc_ServerProxy(index)
+    pypi = xmlrpclib.ServerProxy(index)
     hits = pypi.search({'name': searchstring, 'summary': searchstring}, 'or')
-    packages = []
-    summary_prefix = ''
-    if show_source:
-        summary_prefix = "[{index}]: ".format(
-            index = index.replace('/RPC2', '')
-        )
+    packages = {}
+    source = index.replace('/RPC2', '')
     for package_result in hits:
         pkg_dict = {}
-        pkg_dict['pkgname'] = package_result.get('name')
+        name = package_result.get('name')
+        pkg_dict['pkgname'] = name
         pkg_dict['version'] = package_result.get('version')
-        pkg_dict['summary'] = summary_prefix + package_result.get('summary')
-        packages.append(PkgFile(**pkg_dict))
+        pkg_dict['source'] = source 
+        pkg_dict['summary'] = package_result.get('summary')
+        packages[name]=(PkgFile(**pkg_dict))
     return packages
 
 try:
