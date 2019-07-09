@@ -4,5 +4,4 @@
 # Install it with:
 #   pip install -r requirements/exe.pip
 
-xmlrpc
 -e .
