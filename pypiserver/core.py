@@ -323,7 +323,7 @@ def _digest_file(fpath, hash_algo):
     return digester.hexdigest()[:32]
 
 
-def find_packages_fallback(searchstring, fallback_index=None, fallback_search=None):
+def find_packages_fallback(searchstring, fallback_index=None, fallback_search=None, show_source=True):
     index = 'https://pypi.org/RPC2'
     if fallback_search is not None:
         index = fallback_search
@@ -332,9 +332,11 @@ def find_packages_fallback(searchstring, fallback_index=None, fallback_search=No
     pypi = xmlrpc_ServerProxy(index)
     hits = pypi.search({'name': searchstring, 'summary': searchstring}, 'or')
     packages = []
-    summary_prefix = "[{index}]: ".format(
-        index = index.replace('/RPC2', '')
-    )
+    summary_prefix = ''
+    if show_source:
+        summary_prefix = "[{index}]: ".format(
+            index = index.replace('/RPC2', '')
+        )
     for package_result in hits:
         pkg_dict = {}
         pkg_dict['pkgname'] = package_result.get('name')
