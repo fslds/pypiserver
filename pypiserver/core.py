@@ -332,6 +332,9 @@ def find_packages_fallback(searchstring, fallback_index=None, fallback_search=No
     pypi = xmlrpc_ServerProxy(index)
     hits = pypi.search({'name': searchstring, 'summary': searchstring}, 'or')
     packages = []
+    summary_prefix = "[{index}]: ".format(
+        index = index.replace('/RPC2', '')
+    )
     for package_result in hits:
         pkg_dict = {}
         pkg_dict['pkgname'] = package_result.get('name')
