@@ -19,6 +19,10 @@ try:  # PY3
 except ImportError:  # PY2
     from urllib import quote
 
+try: # PY3
+    from xmlrpc.client import ServerProxy as xmlrpc_ServerProxy
+except ImportError: # PY2
+    from xmlrpclib import ServerProxy as xmlrpc_ServerProxy
 import pkg_resources
 
 from . import Configuration
@@ -326,7 +330,7 @@ def find_packages_fallback(searchstring, fallback_index=None, fallback_search=No
         index = fallback_search
     elif fallback_index:
         index = fallback_index.replace('/simple', '/RPC2')
-    pypi = xmlrpc.client.ServerProxy(index)
+    pypi = xmlrpc_ServerProxy(index)
     hits = pypi.search({'name': searchstring, 'summary': searchstring}, 'or')
     packages = []
     for package_result in hits:
