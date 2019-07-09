@@ -227,7 +227,7 @@ def handle_rpc():
                 # We do not presently have any description/summary, returning
                 # version instead
                 d = {'_pypi_ordering': ordering, 'version': p.version,
-                     'name': p.pkgname, 'summary': p.summary}
+                     'name': p.pkgname, 'summary': '[local]: ' + p.summary}
                 namelist.append(p.pkgname)
                 response.append(d)
             ordering += 1
