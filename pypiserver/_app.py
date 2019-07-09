@@ -230,15 +230,15 @@ def handle_rpc():
             if p.pkgname.count(query) > 0:
                 # Adding local packages
                 found_packages[p.pkgname] = p
-        for package in sorted(found_packages.keys()):
-                if package.pkgname not in namelist:
-                    d = {
-                        #'_pypi_ordering': ordering, 
-                        # internal pypi value that shouldn't be there. List order suffices.
-                        'version': package.version, 
-                        'name' : package.pkgname, 
-                        'summary' : package.summary}
-                    response.append(d)
+        for package_name in sorted(found_packages.keys()):
+            package = found_packages[package_name]
+            d = {
+                #'_pypi_ordering': ordering, 
+                # internal pypi value that shouldn't be there. List order suffices.
+                'version': package.version, 
+                'name' : package.pkgname, 
+                'summary' : package.summary}
+            response.append(d)
 
         call_string = xmlrpclib.dumps((response,), 'search',
                                       methodresponse=True)
