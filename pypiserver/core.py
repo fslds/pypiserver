@@ -339,7 +339,7 @@ def find_packages_fallback(searchstring, fallback_index=None, fallback_search=No
         pkg_dict = {}
         pkg_dict['pkgname'] = package_result.get('name')
         pkg_dict['version'] = package_result.get('version')
-        pkg_dict['summary'] = package_result.get('summary')
+        pkg_dict['summary'] = summary_prefix + package_result.get('summary')
         packages.append(PkgFile(**pkg_dict))
     return packages
 
